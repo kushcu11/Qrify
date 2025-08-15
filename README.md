@@ -46,7 +46,7 @@ To run this project on your local machine, please follow these steps. The instru
 
 ### Prerequisites
 
-Make sure you have [Node.js](https://nodejs.org/) (version 20 or later) installed on your system.
+Make sure you have [Node.js](https://nodejs.org/) (version 20 or later) and [Git](https://git-scm.com/downloads) installed on your system.
 
 ### 1. Set up Environment Variables
 
@@ -88,6 +88,57 @@ This project requires two separate development servers to be running at the same
     This will start the Genkit development server, which your Next.js app will communicate with for AI features.
 
 Now you have the complete setup running locally!
+
+## Pushing to GitHub
+
+To store your project on GitHub and keep track of changes, follow these steps:
+
+### Prerequisites
+
+*   Make sure you have [Git](https://git-scm.com/downloads) installed. You can check by opening your terminal and typing `git --version`.
+*   You need a [GitHub account](https://github.com/join).
+
+### Steps
+
+1.  **Create a New Repository on GitHub:**
+    *   Go to [GitHub](https://github.com/) and log in.
+    *   Click the `+` icon in the top-right corner and select "New repository".
+    *   Give your repository a name (e.g., `qrify-app`).
+    *   You can add a description, but **do not** initialize it with a README, .gitignore, or license file. The project already has these.
+    *   Click "Create repository".
+
+2.  **Initialize Git in Your Project:**
+    *   Open your terminal and navigate to the root directory of your downloaded project files.
+    *   Run the following command to turn your project folder into a Git repository:
+        ```bash
+        git init -b main
+        ```
+
+3.  **Add and Commit Your Files:**
+    *   Add all the project files to the repository's tracking index:
+        ```bash
+        git add .
+        ```
+    *   Commit the files, which saves a snapshot of your project:
+        ```bash
+        git commit -m "Initial commit"
+        ```
+
+4.  **Connect Your Local Repo to GitHub:**
+    *   On your new GitHub repository page, you'll see a URL. Copy it (it should look like `https://github.com/your-username/your-repo-name.git`).
+    *   In your terminal, connect your local repository to the one on GitHub by running:
+        ```bash
+        git remote add origin https://github.com/your-username/your-repo-name.git
+        ```
+        (Replace the URL with the one you copied).
+
+5.  **Push Your Code:**
+    *   Finally, push your committed files to GitHub:
+        ```bash
+        git push -u origin main
+        ```
+
+Now your code is safely stored on GitHub!
 
 ## Sharing with Your Client
 

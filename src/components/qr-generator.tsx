@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useState, useTransition, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -29,7 +29,14 @@ interface QrResult {
 export default function QrGenerator() {
   const [isPending, startTransition] = useTransition();
   const [result, setResult] = useState<QrResult | null>(null);
+  const [origin, setOrigin] = useState('');
   const { toast } = useToast();
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setOrigin(window.location.origin);
+    }
+  }, []);
 
   const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
@@ -42,7 +49,7 @@ export default function QrGenerator() {
     setResult(null);
     form.clearErrors();
     startTransition(async () => {
-      const response = await generateQrCodeAction(data);
+      const response = await generateQrCodeAction(data, origin);
       if (response.success && response.qrCodeUrl && response.finalUrl) {
         setResult({
           qrCodeUrl: response.qrCodeUrl,
@@ -74,6 +81,8 @@ export default function QrGenerator() {
   
   const handleDownload = () => {
       if (!result) return;
+      // We are downloading the QR code image from the external API directly
+      // as the scan URL itself is not an image.
       fetch(result.qrCodeUrl)
           .then(response => response.blob())
           .then(blob => {
@@ -104,7 +113,7 @@ export default function QrGenerator() {
             <svg width="32" height="32" viewBox="0 0 100 100" className="text-primary"><path fill="currentColor" d="M10 10h30v30H10z m5 5v20h20V15z m35-5h30v30H50z m5 5v20h20V15z M10 50h30v30H10z m5 5v20h20V55z m42.5 12.5h20v20h-20z m22.5 10h5v2.5h-5z m-5-5h2.5v5h-5v-2.5h2.5z m-2.5-5h5v5h-5z m-2.5 12.5h2.5v2.5h-2.5z m-12.5-17.5h5v5h-5z m10 2.5h2.5v5h-2.5z m-5-10h2.5v5h-2.5z m15 5h2.5v2.5h-2.5z m-10 12.5h5v2.5h-5z m5 5h2.5v2.5h-2.5z m10-2.5h2.5v5h-2.5z m2.5 5h2.5v2.5h-2.5z m-2.5 2.5h-2.5v5h5v-2.5h-2.5z m-12.5 0h-2.5v2.5h5v-2.5h-2.5z m-5-10h-2.5v2.5h2.5z m-2.5-2.5v-2.5h-5v5h2.5v-2.5h2.5z M50 50h2.5v2.5H50V50zm5 0h2.5v2.5H55V50zm-5 5h2.5v2.5H50v-2.5zm5 0h2.5v2.5H55v-2.5z"/></svg>
             <CardTitle className="font-headline text-3xl">QRify</CardTitle>
         </div>
-        <CardDescription>Enter a URL or search term to generate a QR code.</CardDescription>
+        <CardDescription>Enter a URL or search term to generate a single-use QR code.</CardDescription>
       </CardHeader>
       <CardContent>
         <Form {...form}>
@@ -122,7 +131,7 @@ export default function QrGenerator() {
                 </FormItem>
               )}
             />
-            <Button type="submit" className="w-full" disabled={isPending}>
+            <Button type="submit" className="w-full" disabled={isPending || !origin}>
               {isPending ? (
                 <Loader2 className="animate-spin" />
               ) : (

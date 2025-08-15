@@ -3,6 +3,8 @@
 import { z } from 'zod';
 import { enhanceRedirectURL } from '@/ai/flows/enhance-redirect-flow';
 import { validateRedirectURL } from '@/ai/flows/validate-redirect-url-flow';
+import { db } from '@/lib/firebase';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 
 const urlSchema = z.object({
   url: z.string().min(1, { message: 'Please enter a URL or search term.' }),
@@ -10,7 +12,7 @@ const urlSchema = z.object({
 
 const URL_REGEX = /^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/\w.-]*)*\/?$/i;
 
-export async function generateQrCodeAction(data: { url: string }) {
+export async function generateQrCodeAction(data: { url: string }, origin: string) {
     const validatedFields = urlSchema.safeParse(data);
 
     if (!validatedFields.success) {
@@ -39,7 +41,15 @@ export async function generateQrCodeAction(data: { url: string }) {
             finalUrl = result.enhancedURL;
         }
         
-        const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=256x256&data=${encodeURIComponent(finalUrl)}`;
+        const qrCodeDocRef = await addDoc(collection(db, 'qr-codes'), {
+            url: finalUrl,
+            createdAt: serverTimestamp(),
+        });
+
+        const qrCodeId = qrCodeDocRef.id;
+        const scanUrl = `${origin}/api/qr/${qrCodeId}`;
+
+        const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=256x256&data=${encodeURIComponent(scanUrl)}`;
         
         return {
             success: true,

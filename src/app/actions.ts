@@ -59,10 +59,10 @@ export async function generateQrCodeAction(data: { url: string }, origin: string
         };
     } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred.';
-        if (errorMessage.includes('Failed to generate content') || errorMessage.includes('upstream')) {
+        if (errorMessage.includes('Failed to generate content') || errorMessage.includes('upstream') || errorMessage.includes('permission-denied')) {
             return {
                 success: false,
-                error: 'The AI service is currently unavailable. Please try again later.'
+                error: 'The AI service or database is currently unavailable. Please try again later.'
             };
         }
         return {

@@ -1,0 +1,17 @@
+
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // By default, deny all reads and writes.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Allow server-side access to the qr-codes collection.
+    // Your web app's server-side code will be authenticated with a service account.
+    match /qr-codes/{qrCodeId} {
+      allow read, write: if request.auth != null;
+    }
+  }
+}

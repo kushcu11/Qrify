@@ -4,7 +4,7 @@ This is a NextJS starter in Firebase Studio.
 
 ## Running Locally
 
-To run this project on your local machine, please follow these steps.
+To run this project on your local machine, please follow these steps. The instructions are compatible with macOS, Windows, and Linux.
 
 ### Prerequisites
 
@@ -25,7 +25,7 @@ The project uses Google's Generative AI. To access the API, you need to provide 
 
 ### 2. Install Dependencies
 
-Open your terminal, navigate to the project's root directory, and run the following command to install the required packages:
+Open your terminal (on macOS, you can find the Terminal app in `/Applications/Utilities`), navigate to the project's root directory, and run the following command to install the required packages:
 
 ```bash
 npm install
@@ -43,7 +43,7 @@ This project requires two separate development servers to be running at the same
     Your application should now be running at [http://localhost:9002](http://localhost:9002).
 
 2.  **Start the Genkit server:**
-    Open a **second** terminal window and run:
+    Open a **second** terminal window (on macOS, you can use `Cmd + T` in the existing Terminal window to open a new tab) and run:
     ```bash
     npm run genkit:dev
     ```

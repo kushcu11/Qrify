@@ -185,3 +185,25 @@ The best way to share your work with a client is to deploy it to the web. This g
     Once the deployment is complete, the terminal will output the public URL for your live application. It will look something like `https://your-project-name.web.app`.
 
 You can now send this URL to your client! They will be able to use the QR code generator live in their browser.
+
+## Cost Considerations for Scaling
+
+While this application uses services with generous free tiers, scaling to a large number of users (e.g., 10,000) will likely incur costs. It is impossible to give an exact number, as it depends on user behavior. Here is a breakdown of the services you will be billed for:
+
+1.  **Firebase App Hosting**:
+    *   **Use Case**: Hosts the Next.js web application.
+    *   **Pricing Model**: Based on the compute resources (CPU, memory) used to run the app and the amount of data (bandwidth) transferred. The number of running instances will scale with traffic.
+    *   **Recommendation**: Review the "Firebase App Hosting pricing" page for details.
+
+2.  **Cloud Firestore (Database)**:
+    *   **Use Case**: Stores the destination URL for each QR code to enable the single-use feature.
+    *   **Pricing Model**: Billed per operation (reads, writes, deletes). Each QR code generation costs 1 write. Each successful scan costs 1 read and 1 delete.
+    *   **Recommendation**: Review the "Cloud Firestore pricing" page. You can estimate costs based on the expected number of QR codes generated and scanned per month.
+
+3.  **Google AI Platform (Gemini API)**:
+    *   **Use Case**: This is the AI model that enhances search terms into URLs and validates user-provided URLs for safety.
+    *   **Pricing Model**: Billed based on the number of input and output "tokens" (pieces of words) processed. This is your most variable cost. Every time a user enters a search term or a URL, it results in an API call.
+    *   **Recommendation**: Review the "Google AI Platform pricing" or "Gemini API pricing". Your cost will depend on the ratio of users who type in full URLs versus those who use search terms.
+
+4.  **QR Code Image Generation (`api.qrserver.com`)**:
+    *   This service is currently free. However, for a production application with thousands of users, relying on a free, third-party API carries risks (e.g., rate-limiting, downtime, discontinuation). For a mission-critical application, you may want to consider a paid, dedicated QR code generation service for better reliability.

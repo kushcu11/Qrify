@@ -11,7 +11,7 @@ This project was built inside **Firebase Studio**.
 *   **Styling**: [Tailwind CSS](https://tailwindcss.com/)
 *   **UI Components**: [ShadCN UI](https://ui.shadcn.com/)
 *   **Database**: [Cloud Firestore](https://firebase.google.com/docs/firestore)
-*   **AI/Generative**: [Firebase Genkit](https://firebase.google.com/docs/genkit)
+*   **AI/Generative**: [Firebase Genkit](https://firebase.google.com/docs/genkit) (with Google's Gemini model)
 *   **Deployment**: [Firebase App Hosting](https://firebase.google.com/docs/app-hosting)
 
 ## Core Workflows
@@ -22,11 +22,11 @@ This is the process flow when a user generates a new QR code:
 
 1.  **User Input**: The user enters a URL or a search query into the input field in the `QrGenerator` component (`src/components/qr-generator.tsx`).
 2.  **Server Action**: On form submission, the `generateQrCodeAction` server action (`src/app/actions.ts`) is called.
-3.  **Input Handling**:
-    *   If the input is a URL, it's validated for safety using the `validateRedirectURL` Genkit flow (`src/ai/flows/validate-redirect-url-flow.ts`).
-    *   If the input is a search term, it's sent to the `enhanceRedirectURL` Genkit flow (`src/ai/flows/enhance-redirect-flow.ts`) to find the most relevant official URL.
-4.  **Database Write**: The final, validated URL is stored in a new document in the `qr-codes` collection in Firestore. This document gets a unique ID.
-5.  **QR Code Creation**: The unique document ID is used to construct a "scan URL" pointing to our API route (e.g., `https://<your-app-url>/api/qr/<document-id>`). This scan URL is then encoded into a QR code image using an external API (`qrserver.com`).
+3.  **AI-Powered Input Handling**:
+    *   If the input is a URL, it's validated for safety using the `validateRedirectURL` Genkit flow (`src/ai/flows/validate-redirect-url-flow.ts`), which uses the Gemini AI model.
+    *   If the input is a search term, it's sent to the `enhanceRedirectURL` Genkit flow (`src/ai/flows/enhance-redirect-flow.ts`) to find the most relevant official URL, also using the Gemini AI model.
+4.  **Database Write**: The final, AI-validated URL is stored in a new document in the `qr-codes` collection in Firestore. This document gets a unique ID.
+5.  **QR Code Creation**: The unique document ID is used to construct a "scan URL" pointing to our API route (e.g., `https://<your-app-url>/api/qr/<document-id>`). This scan URL is then encoded into a QR code image using a free external API (`qrserver.com`).
 6.  **Display**: The generated QR code image and the final destination URL are displayed to the user.
 
 ### 2. QR Code Scanning & Invalidation
@@ -50,7 +50,7 @@ Make sure you have [Node.js](https://nodejs.org/) (version 20 or later) and [Git
 
 ### 1. Set up Environment Variables
 
-The project uses Google's Generative AI. To access the API, you need to provide an API key.
+The project uses Google's Generative AI (Gemini) for two key features: enhancing search terms into valid URLs and validating user-submitted URLs for safety. To access the API, you need to provide an API key. **This is not for the QR code image generation itself**, which is handled by a free service.
 
 1.  Create a new file named `.env` in the root of the project.
 2.  Add your Google AI API key to the `.env` file as follows:

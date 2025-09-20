@@ -11,6 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { generateQrCodeAction } from '@/app/actions';
+import { enhanceRedirectURL } from '@/ai/flows/enhance-redirect-flow';
 import { useToast } from '@/hooks/use-toast';
 import { Sparkles, Download, Copy, Loader2, QrCode } from 'lucide-react';
 import { Skeleton } from './ui/skeleton';
@@ -62,14 +63,48 @@ export default function QrGenerator() {
         return;
     }
     startTransition(async () => {
-      const response = await generateQrCodeAction({ ...data, userId: user.uid }, origin);
-      if (response.success && response.qrCodeUrl && response.finalUrl) {
-        setResult({
-          qrCodeUrl: response.qrCodeUrl,
-          finalUrl: response.finalUrl,
-        });
-      } else {
-        form.setError('url', { type: 'manual', message: response.error });
+      let finalUrl = data.url;
+      let isSingleUse = true;
+
+      try {
+        if (URL_REGEX.test(finalUrl)) {
+          // It's a URL, ensure it has http/https
+          finalUrl = finalUrl.startsWith('http') ? finalUrl : `https://${finalUrl}`;
+        } else {
+          // It's not a URL. Try to enhance it with AI.
+          const enhancedResult = await enhanceRedirectURL({ userInput: finalUrl });
+          if (enhancedResult.enhancedURL) {
+            finalUrl = enhancedResult.enhancedURL;
+          } else {
+            // AI couldn't find a URL, treat as plain text for encoding.
+            isSingleUse = false;
+          }
+        }
+
+        let response;
+        if (isSingleUse) {
+          response = await generateQrCodeAction({ url: finalUrl, userId: user.uid }, origin);
+        } else {
+          // For plain text, we don't save to DB. The QR code directly contains the text.
+          const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=256x256&data=${encodeURIComponent(finalUrl)}`;
+          response = { success: true, qrCodeUrl, finalUrl };
+        }
+
+        if (response.success && response.qrCodeUrl && response.finalUrl) {
+            setResult({
+              qrCodeUrl: response.qrCodeUrl,
+              finalUrl: response.finalUrl,
+            });
+        } else {
+            form.setError('url', { type: 'manual', message: (response as any).error || 'Failed to generate QR code.' });
+        }
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred.';
+        if (errorMessage.includes('Failed to generate content') || errorMessage.includes('upstream')) {
+             form.setError('url', { type: 'manual', message: 'The AI service is currently unavailable. Please try again later.' });
+        } else {
+             form.setError('url', { type: 'manual', message: errorMessage });
+        }
       }
     });
   };

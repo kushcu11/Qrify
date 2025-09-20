@@ -9,8 +9,6 @@ const urlSchema = z.object({
   userId: z.string().optional(),
 });
 
-const URL_REGEX = /^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/\w.-]*)*\/?$/i;
-
 export async function generateQrCodeAction(data: { url: string; userId?: string }, origin: string) {
     const validatedFields = urlSchema.safeParse(data);
 
@@ -22,49 +20,34 @@ export async function generateQrCodeAction(data: { url: string; userId?: string 
     }
 
     const { url, userId } = validatedFields.data;
-    let finalUrl = url;
-    let isSingleUse = true;
-
+    
     try {
-        if (URL_REGEX.test(url)) {
-            const httpUrl = url.startsWith('http') ? url : `https://${url}`;
-            finalUrl = httpUrl;
-        } else {
-           isSingleUse = false;
-           finalUrl = url;
+        const docData: { url: string; createdAt: any; userId?: string } = {
+            url: url,
+            createdAt: serverTimestamp(),
+        };
+        if (userId) {
+            docData.userId = userId;
         }
-        
-        let scanUrl;
-        if (isSingleUse) {
-             const docData: { url: string; createdAt: any; userId?: string } = {
-                url: finalUrl,
-                createdAt: serverTimestamp(),
-            };
-            if (userId) {
-                docData.userId = userId;
-            }
 
-             const qrCodeDocRef = await addDoc(collection(db, 'qr-codes'), docData);
-            const qrCodeId = qrCodeDocRef.id;
-            scanUrl = `${origin}/api/qr/${qrCodeId}`;
-        } else {
-            scanUrl = finalUrl;
-        }
+        const qrCodeDocRef = await addDoc(collection(db, 'qr-codes'), docData);
+        const qrCodeId = qrCodeDocRef.id;
+        const scanUrl = `${origin}/api/qr/${qrCodeId}`;
 
         const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=256x256&data=${encodeURIComponent(scanUrl)}`;
         
         return {
             success: true,
             qrCodeUrl,
-            finalUrl,
+            finalUrl: url,
             error: null,
         };
     } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred.';
-        if (errorMessage.includes('Failed to generate content') || errorMessage.includes('upstream') || errorMessage.includes('permission-denied')) {
+        if (errorMessage.includes('permission-denied')) {
             return {
                 success: false,
-                error: 'The AI service or database is currently unavailable. Please try again later.'
+                error: 'Database operation failed. Please check Firestore security rules.'
             };
         }
         return {

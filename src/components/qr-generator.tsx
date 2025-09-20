@@ -107,13 +107,10 @@ export default function QrGenerator() {
   };
 
   return (
-    <Card className="w-full max-w-md shadow-2xl bg-card/80 backdrop-blur-sm">
-      <CardHeader className="text-center">
-        <div className="mx-auto flex items-center justify-center gap-2 mb-2">
-            <svg width="32" height="32" viewBox="0 0 100 100" className="text-primary"><path fill="currentColor" d="M10 10h30v30H10z m5 5v20h20V15z m35-5h30v30H50z m5 5v20h20V15z M10 50h30v30H10z m5 5v20h20V55z m42.5 12.5h20v20h-20z m22.5 10h5v2.5h-5z m-5-5h2.5v5h-5v-2.5h2.5z m-2.5-5h5v5h-5z m-2.5 12.5h2.5v2.5h-2.5z m-12.5-17.5h5v5h-5z m10 2.5h2.5v5h-2.5z m-5-10h2.5v5h-2.5z m15 5h2.5v2.5h-2.5z m-10 12.5h5v2.5h-5z m5 5h2.5v2.5h-2.5z m10-2.5h2.5v5h-2.5z m2.5 5h2.5v2.5h-2.5z m-2.5 2.5h-2.5v5h5v-2.5h-2.5z m-12.5 0h-2.5v2.5h5v-2.5h-2.5z m-5-10h-2.5v2.5h2.5z m-2.5-2.5v-2.5h-5v5h2.5v-2.5h2.5z M50 50h2.5v2.5H50V50zm5 0h2.5v2.5H55V50zm-5 5h2.5v2.5H50v-2.5zm5 0h2.5v2.5H55v-2.5z"/></svg>
-            <CardTitle className="font-headline text-3xl">QRify</CardTitle>
-        </div>
-        <CardDescription>Enter a URL or search term to generate a single-use QR code.</CardDescription>
+    <Card className="w-full max-w-lg shadow-lg">
+      <CardHeader>
+        <CardTitle className="text-2xl">Single-Use QR Code Generator</CardTitle>
+        <CardDescription>Enter a URL or search term. The generated QR code will be valid for one scan only.</CardDescription>
       </CardHeader>
       <CardContent>
         <Form {...form}>
@@ -171,7 +168,7 @@ export default function QrGenerator() {
             </div>
           )}
           {!result && !isPending && (
-             <div className="h-64 w-64 flex items-center justify-center bg-muted/50 rounded-lg border-2 border-dashed">
+             <div className="w-full max-w-xs aspect-square flex items-center justify-center bg-muted/50 rounded-lg border-2 border-dashed">
                 <QrCode className="h-24 w-24 text-muted-foreground/50" />
              </div>
           )}

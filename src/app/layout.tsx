@@ -6,8 +6,8 @@ import { Toaster } from "@/components/ui/toaster"
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
 
 export const metadata: Metadata = {
-  title: 'QRify',
-  description: 'Generate unique QR codes instantly.',
+  title: 'QRify Pro',
+  description: 'The Ultimate Platform for Digital Engagement',
 };
 
 export default function RootLayout({
@@ -18,7 +18,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body>
-        <div className={`${inter.variable} font-body`}>
+        <div className={`${inter.variable} font-body antialiased`}>
           {children}
           <Toaster />
         </div>

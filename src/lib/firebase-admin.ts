@@ -22,8 +22,8 @@ if (!admin.apps.length) {
     } else {
         console.warn("Firebase Admin SDK service account not found. Some features may not work.");
         // Initialize without credentials for local dev if needed, though some actions will fail
-        admin.initializeApp();
+        // admin.initializeApp();
     }
 }
 
-export const adminApp = admin.app();
+export const adminApp = admin.apps.length ? admin.app() : null;

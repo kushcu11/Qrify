@@ -1,8 +1,7 @@
 'use client';
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import { onAuthStateChanged, User, signOut, signInWithCustomToken } from 'firebase/auth';
+import { onAuthStateChanged, User, signOut } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
-import { setCookie, destroyCookie, parseCookies } from 'nookies';
 import { useRouter } from 'next/navigation';
 
 interface AuthContextType {
@@ -19,18 +18,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const router = useRouter();
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
       setUser(user);
       setLoading(false);
-      if (user) {
-        const token = await user.getIdToken();
-        setCookie(null, 'firebaseIdToken', token, {
-            maxAge: 30 * 24 * 60 * 60,
-            path: '/',
-        });
-      } else {
-        destroyCookie(null, 'firebaseIdToken', { path: '/' });
-      }
     });
 
     return () => unsubscribe();

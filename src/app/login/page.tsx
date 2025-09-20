@@ -13,9 +13,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
-import { signInWithEmailAndPassword as clientSignIn, signInWithCustomToken } from 'firebase/auth';
+import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
-import { signInWithEmailAndPassword } from '../actions';
 
 const formSchema = z.object({
   email: z.string().email('Please enter a valid email address.'),
@@ -40,18 +39,7 @@ export default function LoginPage() {
   const onSubmit = async (data: FormSchema) => {
     setIsPending(true);
     try {
-       // First, verify password with client SDK
-      await clientSignIn(auth, data.email, data.password);
-
-      // Then, get custom token from server action
-      const serverResponse = await signInWithEmailAndPassword(data);
-
-      if (!serverResponse.success || !serverResponse.token) {
-        throw new Error(serverResponse.error || 'Failed to get session token.');
-      }
-      
-      // Finally, sign in with the custom token to establish the session for our context provider
-      await signInWithCustomToken(auth, serverResponse.token);
+      await signInWithEmailAndPassword(auth, data.email, data.password);
 
       toast({
         title: 'Success!',

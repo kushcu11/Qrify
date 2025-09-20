@@ -13,9 +13,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
-import { signInWithCustomToken } from 'firebase/auth';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
-import { signupWithEmailAndPassword } from '../actions';
 
 const formSchema = z.object({
   email: z.string().email('Please enter a valid email address.'),
@@ -40,13 +39,7 @@ export default function SignUpPage() {
   const onSubmit = async (data: FormSchema) => {
     setIsPending(true);
     try {
-      const response = await signupWithEmailAndPassword(data);
-
-      if (!response.success || !response.token) {
-        throw new Error(response.error || 'An unexpected error occurred during sign up.');
-      }
-      
-      await signInWithCustomToken(auth, response.token);
+      await createUserWithEmailAndPassword(auth, data.email, data.password);
 
       toast({
         title: 'Success!',
@@ -54,10 +47,14 @@ export default function SignUpPage() {
       });
       router.push('/dashboard');
     } catch (error: any) {
+      let message = 'An unexpected error occurred.';
+       if (error.code === 'auth/email-already-in-use') {
+         message = 'This email is already associated with an account.';
+       }
       toast({
         variant: 'destructive',
         title: 'Sign Up Failed',
-        description: error.message || "An unexpected error occurred.",
+        description: message,
       });
     } finally {
       setIsPending(false);

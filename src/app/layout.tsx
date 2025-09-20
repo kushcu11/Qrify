@@ -6,8 +6,8 @@ import { Toaster } from "@/components/ui/toaster"
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
 
 export const metadata: Metadata = {
-  title: 'QRify',
-  description: 'Single-Use QR Code Generator',
+  title: 'QRify - Single-Use QR Code Generator',
+  description: 'The easiest way to create single-use, expiring QR codes.',
 };
 
 export default function RootLayout({

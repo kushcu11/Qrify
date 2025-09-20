@@ -1,8 +1,18 @@
 import * as admin from 'firebase-admin';
 
+// This is a workaround for the Vercel deployment environment.
+// The private key needs to have newline characters correctly formatted.
+const privateKey = process.env.FIREBASE_SERVICE_ACCOUNT_KEY
+  ? JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY).private_key.replace(/\\n/g, '\n')
+  : undefined;
+
 const serviceAccount = process.env.FIREBASE_SERVICE_ACCOUNT_KEY
-  ? JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY)
+  ? {
+      ...JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY),
+      private_key: privateKey,
+    }
   : null;
+
 
 if (!admin.apps.length) {
     if (serviceAccount) {
@@ -15,6 +25,5 @@ if (!admin.apps.length) {
         admin.initializeApp();
     }
 }
-
 
 export const adminApp = admin.app();

@@ -1,8 +1,8 @@
 'use client';
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import { onAuthStateChanged, User, signOut } from 'firebase/auth';
+import { onAuthStateChanged, User, signOut, signInWithCustomToken } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
-import { setCookie, destroyCookie } from 'nookies';
+import { setCookie, destroyCookie, parseCookies } from 'nookies';
 import { useRouter } from 'next/navigation';
 
 interface AuthContextType {

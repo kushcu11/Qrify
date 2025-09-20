@@ -13,8 +13,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
-import { signInWithEmailAndPassword } from 'firebase/auth';
+import { signInWithEmailAndPassword as clientSignIn, signInWithCustomToken } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
+import { signInWithEmailAndPassword } from '../actions';
 
 const formSchema = z.object({
   email: z.string().email('Please enter a valid email address.'),
@@ -39,7 +40,19 @@ export default function LoginPage() {
   const onSubmit = async (data: FormSchema) => {
     setIsPending(true);
     try {
-      await signInWithEmailAndPassword(auth, data.email, data.password);
+       // First, verify password with client SDK
+      await clientSignIn(auth, data.email, data.password);
+
+      // Then, get custom token from server action
+      const serverResponse = await signInWithEmailAndPassword(data);
+
+      if (!serverResponse.success || !serverResponse.token) {
+        throw new Error(serverResponse.error || 'Failed to get session token.');
+      }
+      
+      // Finally, sign in with the custom token to establish the session for our context provider
+      await signInWithCustomToken(auth, serverResponse.token);
+
       toast({
         title: 'Success!',
         description: "You've been logged in.",
@@ -49,6 +62,8 @@ export default function LoginPage() {
         let errorMessage = "An unexpected error occurred.";
         if (error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found') {
             errorMessage = 'Invalid email or password. Please try again.';
+        } else if (error instanceof Error) {
+            errorMessage = error.message;
         }
       toast({
         variant: 'destructive',

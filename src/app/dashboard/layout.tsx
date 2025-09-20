@@ -1,12 +1,24 @@
+'use client';
 import { SidebarProvider, Sidebar, SidebarTrigger, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarInset } from '@/components/ui/sidebar';
-import { QrCode, LayoutDashboard } from 'lucide-react';
+import { QrCode, LayoutDashboard, UserCircle, LogOut } from 'lucide-react';
 import Link from 'next/link';
+import { useAuth } from '@/context/auth-context';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { Button } from '@/components/ui/button';
 
 export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const { user, loading, logout } = useAuth();
   return (
     <SidebarProvider>
       <Sidebar>
@@ -43,6 +55,24 @@ export default function DashboardLayout({
           <div className="flex-1">
             <h1 className="text-lg font-semibold">Dashboard</h1>
           </div>
+            { !loading && user && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className="rounded-full">
+                    <UserCircle className="h-6 w-6" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuLabel>{user.email}</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={logout}>
+                    <LogOut className="mr-2 h-4 w-4" />
+                    <span>Log out</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )
+          }
         </header>
         <main className="flex-1 p-6">{children}</main>
       </SidebarInset>

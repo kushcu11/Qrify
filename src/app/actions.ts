@@ -1,17 +1,22 @@
 'use server';
 
 import { z } from 'zod';
-import { enhanceRedirectURL } from '@/ai/flows/enhance-redirect-flow';
 import { db } from '@/lib/firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { auth } from 'firebase-admin';
+import { getAuth } from 'firebase-admin/auth';
+import {getApp} from 'firebase-admin/app';
+import { adminApp } from '@/lib/firebase-admin';
+
 
 const urlSchema = z.object({
   url: z.string().min(1, { message: 'Please enter a URL or search term.' }),
+  userId: z.string().optional(),
 });
 
 const URL_REGEX = /^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/\w.-]*)*\/?$/i;
 
-export async function generateQrCodeAction(data: { url: string }, origin: string) {
+export async function generateQrCodeAction(data: { url: string; userId?: string }, origin: string) {
     const validatedFields = urlSchema.safeParse(data);
 
     if (!validatedFields.success) {
@@ -21,7 +26,7 @@ export async function generateQrCodeAction(data: { url: string }, origin: string
         };
     }
 
-    const { url } = validatedFields.data;
+    const { url, userId } = validatedFields.data;
     let finalUrl = url;
     let isSingleUse = true;
 
@@ -30,21 +35,24 @@ export async function generateQrCodeAction(data: { url: string }, origin: string
             const httpUrl = url.startsWith('http') ? url : `https://${url}`;
             finalUrl = httpUrl;
         } else {
-           // It's not a URL, so treat it as plain text and disable single-use.
            isSingleUse = false;
            finalUrl = url;
         }
         
         let scanUrl;
         if (isSingleUse) {
-             const qrCodeDocRef = await addDoc(collection(db, 'qr-codes'), {
+             const docData: { url: string; createdAt: any; userId?: string } = {
                 url: finalUrl,
                 createdAt: serverTimestamp(),
-            });
+            };
+            if (userId) {
+                docData.userId = userId;
+            }
+
+             const qrCodeDocRef = await addDoc(collection(db, 'qr-codes'), docData);
             const qrCodeId = qrCodeDocRef.id;
             scanUrl = `${origin}/api/qr/${qrCodeId}`;
         } else {
-            // For plain text, the data is the text itself.
             scanUrl = finalUrl;
         }
 

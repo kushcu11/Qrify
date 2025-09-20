@@ -14,6 +14,7 @@ import { generateQrCodeAction } from '@/app/actions';
 import { useToast } from '@/hooks/use-toast';
 import { Sparkles, Download, Copy, Loader2, QrCode } from 'lucide-react';
 import { Skeleton } from './ui/skeleton';
+import { useAuth } from '@/context/auth-context';
 
 const formSchema = z.object({
   url: z.string().min(1, 'Please enter a URL or text.'),
@@ -34,6 +35,7 @@ export default function QrGenerator() {
   const [result, setResult] = useState<QrResult | null>(null);
   const [origin, setOrigin] = useState('');
   const { toast } = useToast();
+  const { user } = useAuth();
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -51,8 +53,16 @@ export default function QrGenerator() {
   const onSubmit = (data: FormSchema) => {
     setResult(null);
     form.clearErrors();
+    if (!user) {
+        toast({
+            variant: 'destructive',
+            title: 'Not Authenticated',
+            description: 'You need to be logged in to generate a QR code.',
+        });
+        return;
+    }
     startTransition(async () => {
-      const response = await generateQrCodeAction(data, origin);
+      const response = await generateQrCodeAction({ ...data, userId: user.uid }, origin);
       if (response.success && response.qrCodeUrl && response.finalUrl) {
         setResult({
           qrCodeUrl: response.qrCodeUrl,
@@ -154,7 +164,7 @@ export default function QrGenerator() {
                 </FormItem>
               )}
             />
-            <Button type="submit" className="w-full" disabled={isPending || !origin}>
+            <Button type="submit" className="w-full" disabled={isPending || !origin || !user}>
               {isPending ? (
                 <Loader2 className="animate-spin" />
               ) : (

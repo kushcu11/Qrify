@@ -1,9 +1,13 @@
+'use client';
+
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { CheckCircle } from 'lucide-react';
 import Link from 'next/link';
+import { useAuth } from '@/context/auth-context';
 
 export default function LandingPage() {
+  const { user } = useAuth();
   return (
     <div className="flex flex-col min-h-screen bg-background">
       <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -15,13 +19,21 @@ export default function LandingPage() {
             </Link>
           </div>
           <div className="flex flex-1 items-center justify-end space-x-2">
-            <nav className="flex items-center">
-              <Button asChild variant="ghost">
-                <Link href="/dashboard">Log in</Link>
-              </Button>
-              <Button asChild>
-                <Link href="/dashboard">Get Started</Link>
-              </Button>
+             <nav className="flex items-center">
+              {user ? (
+                <Button asChild>
+                  <Link href="/dashboard">Go to Dashboard</Link>
+                </Button>
+              ) : (
+                <>
+                  <Button asChild variant="ghost">
+                    <Link href="/login">Log in</Link>
+                  </Button>
+                  <Button asChild>
+                    <Link href="/signup">Sign Up</Link>
+                  </Button>
+                </>
+              )}
             </nav>
           </div>
         </div>
@@ -42,7 +54,7 @@ export default function LandingPage() {
                 </div>
                 <div className="flex flex-col gap-2 min-[400px]:flex-row">
                   <Button asChild size="lg">
-                    <Link href="/dashboard">Go to Dashboard</Link>
+                    <Link href="/dashboard">Get Started</Link>
                   </Button>
                 </div>
               </div>
@@ -71,16 +83,16 @@ export default function LandingPage() {
                 </div>
                 <div className="mx-auto grid max-w-5xl items-start gap-8 sm:grid-cols-2 md:gap-12 lg:grid-cols-3 mt-12">
                     <div className="grid gap-1">
-                        <h3 className="text-lg font-bold">Single-Use QR Codes</h3>
-                        <p className="text-sm text-muted-foreground">Secure, expiring QR codes perfect for events and promotions.</p>
+                        <h3 className="text-lg font-bold">User Accounts</h3>
+                        <p className="text-sm text-muted-foreground">Securely manage your QR codes with personal accounts.</p>
                     </div>
                     <div className="grid gap-1">
-                        <h3 className="text-lg font-bold">Dynamic QR Codes</h3>
-                        <p className="text-sm text-muted-foreground">Update the destination of your QR codes without reprinting them.</p>
+                        <h3 className="text-lg font-bold">QR Code History</h3>
+                        <p className="text-sm text-muted-foreground">View and manage all the QR codes you've created.</p>
                     </div>
                     <div className="grid gap-1">
                         <h3 className="text-lg font-bold">Analytics</h3>
-                        <p className="text-sm text-muted-foreground">Track scan counts, locations, and times to understand your audience.</p>
+                        <p className="text-sm text-muted-foreground">Track scan counts to understand your audience engagement.</p>
                     </div>
                 </div>
             </div>
@@ -98,7 +110,9 @@ export default function LandingPage() {
             </div>
             <div className="mx-auto w-full max-w-sm space-y-2">
                 <Button asChild size="lg">
-                    <Link href="/dashboard">Go to Dashboard</Link>
+                  <Link href={user ? "/dashboard" : "/signup"}>
+                    {user ? "Go to Dashboard" : "Sign Up for Free"}
+                  </Link>
                 </Button>
             </div>
           </div>

@@ -5,10 +5,9 @@ import { getAuth } from "firebase/auth";
 const firebaseConfig = {
   projectId: 'qrify-s7573',
   appId: '1:620181817388:web:58c43d6a7db4e4a7236989',
-  storageBucket: 'qrify-s7573.firebasestorage.app',
+  storageBucket: 'qrify-s7573.appspot.com',
   apiKey: 'AIzaSyAQ4G_p0cej4LJOooD5jNxyOuc5GNAWJk8',
   authDomain: 'qrify-s7573.firebaseapp.com',
-  measurementId: '',
   messagingSenderId: '620181817388',
 };
 

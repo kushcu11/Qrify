@@ -2,7 +2,6 @@
 
 import { z } from 'zod';
 import { enhanceRedirectURL } from '@/ai/flows/enhance-redirect-flow';
-import { validateRedirectURL } from '@/ai/flows/validate-redirect-url-flow';
 import { db } from '@/lib/firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 
@@ -28,10 +27,6 @@ export async function generateQrCodeAction(data: { url: string }, origin: string
     try {
         if (URL_REGEX.test(url)) {
             const httpUrl = url.startsWith('http') ? url : `https://${url}`;
-            const validation = await validateRedirectURL({ url: httpUrl });
-            if (!validation.isValid) {
-                throw new Error(validation.reason || 'The provided URL is not valid or safe.');
-            }
             finalUrl = httpUrl;
         } else {
             const result = await enhanceRedirectURL({ userInput: url });

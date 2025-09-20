@@ -3,11 +3,6 @@
 import { z } from 'zod';
 import { db } from '@/lib/firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
-import { auth } from 'firebase-admin';
-import { getAuth } from 'firebase-admin/auth';
-import {getApp} from 'firebase-admin/app';
-import { adminApp } from '@/lib/firebase-admin';
-
 
 const urlSchema = z.object({
   url: z.string().min(1, { message: 'Please enter a URL or search term.' }),

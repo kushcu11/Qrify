@@ -2,13 +2,12 @@ import type {Metadata} from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster"
-import { AuthProvider } from '@/context/auth-context';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
 
 export const metadata: Metadata = {
-  title: 'QRify Pro',
-  description: 'The Ultimate Platform for Digital Engagement',
+  title: 'QRify',
+  description: 'Single-Use QR Code Generator',
 };
 
 export default function RootLayout({
@@ -18,13 +17,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body>
-        <AuthProvider>
-          <div className={`${inter.variable} font-body antialiased`}>
-            {children}
-            <Toaster />
-          </div>
-        </AuthProvider>
+      <body className={`${inter.variable} font-body antialiased`}>
+        {children}
+        <Toaster />
       </body>
     </html>
   );

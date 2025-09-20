@@ -5,9 +5,20 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { CheckCircle } from 'lucide-react';
 import Link from 'next/link';
 import { useAuth } from '@/context/auth-context';
+import { useRouter } from 'next/navigation';
 
 export default function LandingPage() {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
+  const router = useRouter();
+
+  const handleGetStarted = () => {
+    if (user) {
+      router.push('/dashboard');
+    } else {
+      router.push('/signup');
+    }
+  };
+
   return (
     <div className="flex flex-col min-h-screen bg-background">
       <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -20,19 +31,21 @@ export default function LandingPage() {
           </div>
           <div className="flex flex-1 items-center justify-end space-x-2">
              <nav className="flex items-center">
-              {user ? (
-                <Button asChild>
-                  <Link href="/dashboard">Go to Dashboard</Link>
-                </Button>
-              ) : (
-                <>
-                  <Button asChild variant="ghost">
-                    <Link href="/login">Log in</Link>
-                  </Button>
+              {!loading && (
+                user ? (
                   <Button asChild>
-                    <Link href="/signup">Sign Up</Link>
+                    <Link href="/dashboard">Go to Dashboard</Link>
                   </Button>
-                </>
+                ) : (
+                  <>
+                    <Button asChild variant="ghost">
+                      <Link href="/login">Log in</Link>
+                    </Button>
+                    <Button asChild>
+                      <Link href="/signup">Sign Up</Link>
+                    </Button>
+                  </>
+                )
               )}
             </nav>
           </div>
@@ -53,8 +66,8 @@ export default function LandingPage() {
                   </p>
                 </div>
                 <div className="flex flex-col gap-2 min-[400px]:flex-row">
-                  <Button asChild size="lg">
-                    <Link href="/dashboard">Get Started</Link>
+                  <Button size="lg" onClick={handleGetStarted}>
+                    Get Started
                   </Button>
                 </div>
               </div>
@@ -109,10 +122,8 @@ export default function LandingPage() {
               </p>
             </div>
             <div className="mx-auto w-full max-w-sm space-y-2">
-                <Button asChild size="lg">
-                  <Link href={user ? "/dashboard" : "/signup"}>
-                    {user ? "Go to Dashboard" : "Sign Up for Free"}
-                  </Link>
+                <Button size="lg" onClick={handleGetStarted}>
+                  {user ? "Go to Dashboard" : "Sign Up for Free"}
                 </Button>
             </div>
           </div>

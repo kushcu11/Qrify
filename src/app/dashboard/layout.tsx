@@ -12,8 +12,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Button } from '@/components/ui/button';
+import withAuth from '@/components/with-auth';
 
-export default function DashboardLayout({
+function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
@@ -79,3 +80,5 @@ export default function DashboardLayout({
     </SidebarProvider>
   );
 }
+
+export default withAuth(DashboardLayout);

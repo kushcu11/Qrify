@@ -15,6 +15,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
+import { useAuth } from '@/context/auth-context';
 
 const formSchema = z.object({
   email: z.string().email('Please enter a valid email address.'),
@@ -27,6 +28,7 @@ export default function SignUpPage() {
   const [isPending, setIsPending] = useState(false);
   const { toast } = useToast();
   const router = useRouter();
+  const { user, loading } = useAuth();
 
   const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
@@ -60,6 +62,19 @@ export default function SignUpPage() {
       setIsPending(false);
     }
   };
+
+  if (loading) {
+     return (
+        <div className="flex h-screen items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin" />
+        </div>
+      );
+  }
+
+  if (user) {
+    router.push('/dashboard');
+    return null;
+  }
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-muted/40">

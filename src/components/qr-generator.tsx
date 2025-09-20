@@ -16,7 +16,7 @@ import { Sparkles, Download, Copy, Loader2, QrCode } from 'lucide-react';
 import { Skeleton } from './ui/skeleton';
 
 const formSchema = z.object({
-  url: z.string().min(1, 'Please enter a URL or search term.'),
+  url: z.string().min(1, 'Please enter a URL or text.'),
 });
 
 type FormSchema = z.infer<typeof formSchema>;
@@ -25,6 +25,9 @@ interface QrResult {
   qrCodeUrl: string;
   finalUrl: string;
 }
+
+const URL_REGEX = /^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/\w.-]*)*\/?$/i;
+
 
 export default function QrGenerator() {
   const [isPending, startTransition] = useTransition();
@@ -63,26 +66,29 @@ export default function QrGenerator() {
 
   const handleCopy = () => {
     if (!result) return;
-    navigator.clipboard.writeText(result.qrCodeUrl)
+    const isUrl = URL_REGEX.test(result.finalUrl);
+    // If it's a single-use URL, we copy the QR image link. Otherwise, copy the text.
+    const textToCopy = isUrl ? result.qrCodeUrl : result.finalUrl;
+    const description = isUrl ? 'QR code image URL copied to clipboard.' : 'Encoded text copied to clipboard.';
+
+    navigator.clipboard.writeText(textToCopy)
       .then(() => {
         toast({
           title: 'Copied!',
-          description: 'QR code image URL copied to clipboard.',
+          description: description,
         });
       })
       .catch(() => {
         toast({
           variant: 'destructive',
           title: 'Oops!',
-          description: 'Failed to copy URL.',
+          description: 'Failed to copy.',
         });
       });
   };
   
   const handleDownload = () => {
       if (!result) return;
-      // We are downloading the QR code image from the external API directly
-      // as the scan URL itself is not an image.
       fetch(result.qrCodeUrl)
           .then(response => response.blob())
           .then(blob => {
@@ -106,11 +112,31 @@ export default function QrGenerator() {
           });
   };
 
+  const renderResultContent = () => {
+    if (!result) return null;
+
+    const isUrl = URL_REGEX.test(result.finalUrl);
+
+    if (isUrl) {
+      return (
+        <a href={result.finalUrl} target="_blank" rel="noopener noreferrer" className="text-sm text-muted-foreground hover:text-primary underline-offset-4 hover:underline break-all text-center px-4">
+          {result.finalUrl}
+        </a>
+      );
+    }
+    
+    return (
+       <p className="text-sm text-muted-foreground break-all text-center px-4">
+          Encoded Text: "{result.finalUrl}"
+        </p>
+    );
+  }
+
   return (
     <Card className="w-full max-w-lg shadow-lg">
       <CardHeader>
-        <CardTitle className="text-2xl">Single-Use QR Code Generator</CardTitle>
-        <CardDescription>Enter a URL or search term. The generated QR code will be valid for one scan only.</CardDescription>
+        <CardTitle className="text-2xl">QR Code Generator</CardTitle>
+        <CardDescription>Enter a URL for a single-use QR code, or any text to encode it directly.</CardDescription>
       </CardHeader>
       <CardContent>
         <Form {...form}>
@@ -120,9 +146,9 @@ export default function QrGenerator() {
               name="url"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="sr-only">URL or Search Term</FormLabel>
+                  <FormLabel className="sr-only">URL or Text</FormLabel>
                   <FormControl>
-                    <Input placeholder="e.g., youtube.com or 'best tech news'" {...field} />
+                    <Input placeholder="Enter a URL or any text" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -154,15 +180,13 @@ export default function QrGenerator() {
                 className="rounded-lg shadow-lg border bg-white"
                 priority
               />
-               <a href={result.finalUrl} target="_blank" rel="noopener noreferrer" className="text-sm text-muted-foreground hover:text-primary underline-offset-4 hover:underline break-all text-center px-4">
-                {result.finalUrl}
-              </a>
+               {renderResultContent()}
               <div className="flex gap-2">
                 <Button variant="outline" onClick={handleDownload}>
                   <Download className="mr-2 h-4 w-4" /> Download
                 </Button>
                 <Button variant="outline" onClick={handleCopy}>
-                  <Copy className="mr-2 h-4 w-4" /> Copy Link
+                  <Copy className="mr-2 h-4 w-4" /> Copy
                 </Button>
               </div>
             </div>

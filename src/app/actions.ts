@@ -23,26 +23,30 @@ export async function generateQrCodeAction(data: { url: string }, origin: string
 
     const { url } = validatedFields.data;
     let finalUrl = url;
+    let isSingleUse = true;
 
     try {
         if (URL_REGEX.test(url)) {
             const httpUrl = url.startsWith('http') ? url : `https://${url}`;
             finalUrl = httpUrl;
         } else {
-            const result = await enhanceRedirectURL({ userInput: url });
-            if (!result.enhancedURL) {
-                throw new Error('Could not find a valid URL for your search term.');
-            }
-            finalUrl = result.enhancedURL;
+           // It's not a URL, so treat it as plain text and disable single-use.
+           isSingleUse = false;
+           finalUrl = url;
         }
         
-        const qrCodeDocRef = await addDoc(collection(db, 'qr-codes'), {
-            url: finalUrl,
-            createdAt: serverTimestamp(),
-        });
-
-        const qrCodeId = qrCodeDocRef.id;
-        const scanUrl = `${origin}/api/qr/${qrCodeId}`;
+        let scanUrl;
+        if (isSingleUse) {
+             const qrCodeDocRef = await addDoc(collection(db, 'qr-codes'), {
+                url: finalUrl,
+                createdAt: serverTimestamp(),
+            });
+            const qrCodeId = qrCodeDocRef.id;
+            scanUrl = `${origin}/api/qr/${qrCodeId}`;
+        } else {
+            // For plain text, the data is the text itself.
+            scanUrl = finalUrl;
+        }
 
         const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=256x256&data=${encodeURIComponent(scanUrl)}`;
         
